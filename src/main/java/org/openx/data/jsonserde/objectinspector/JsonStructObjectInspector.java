@@ -44,7 +44,7 @@ public class JsonStructObjectInspector extends StandardStructObjectInspector {
         assert (fieldID >= 0 && fieldID < fields.size());
 
         try {
-            return obj.get(f.getFieldName());
+            return getField(obj, f.getFieldName());
         } catch (JSONException ex) {
             // if key does not exist
             return null;
@@ -59,7 +59,7 @@ public class JsonStructObjectInspector extends StandardStructObjectInspector {
 
         for (int i = 0; i < fields.size(); i++) {
             try {
-                values.add(jObj.get(fields.get(i).getFieldName()));
+                values.add(getField(jObj, fields.get(i).getFieldName()));
             } catch (JSONException ex) {
                 // we're iterating through the keys so 
                 // this should never happen
@@ -68,5 +68,31 @@ public class JsonStructObjectInspector extends StandardStructObjectInspector {
         }
 
         return values;
+    }
+
+    protected Object getField(JSONObject jObj, String fieldName) throws JSONException {
+        if (fieldName.contains("_") && !jObj.has(fieldName)) {
+            String[] keys = fieldName.split("_");
+            String partialKey = "";
+            JSONObject jCurObj = jObj;
+            Object value = null;
+            for (String key : keys) {
+                key = partialKey.isEmpty() ? key : partialKey + "_" + key;
+                if (jCurObj.has(key)) {
+                    value = jCurObj.opt(key);
+                    if (value instanceof JSONObject) {
+                        jCurObj = (JSONObject)value;
+                        partialKey = "";
+                        value = null;
+                    }
+                } else {
+                    /* No value with the current key, _ must have been part of the original key name*/
+                    partialKey = key;
+                }
+            }
+            return value;
+        } else {
+            return jObj.get(fieldName);
+        }
     }
 }

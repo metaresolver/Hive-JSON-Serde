@@ -84,8 +84,7 @@ CREATE TABLE json_table (
 	country string,
 	languages array<string>,
 	religions map<string,array<int>>,
-  full_record string
-)
+	full_record string)
 ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
 WITH SERDEPROPERTIES ("complete.record.key" = "full_record")
 STORED AS TEXTFILE;

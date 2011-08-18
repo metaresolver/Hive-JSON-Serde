@@ -71,6 +71,24 @@ ALTER TABLE json_table SET SERDEPROPERTIES ( "ignore.malformed.json" = "true");
 it will not make the query fail, and the above record will be returned as
 NULL	null	null
 
+* COMPLETE RECORD KEY
+
+It may be desireable to have a column in your table that gives access to the complete JSON record. This can be done by setting the complete.record.key SerDe property and and adding a column to your table that matches the value of that setting:
+
+ALTER TABLE json_table SET SERDEPROPERTIES ( "complete.record.key" = "full_record");
+ALTER TABLE json_table ADD COLUMNS (full_record string);
+
+You can also set this parameter when you create your table:
+
+CREATE TABLE json_table (
+	country string,
+	languages array<string>,
+	religions map<string,array<int>>,
+  full_record string
+)
+ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
+WITH SERDEPROPERTIES ("complete.record.key" = "full_record")
+STORED AS TEXTFILE;
 
 * ARCHITECTURE
 

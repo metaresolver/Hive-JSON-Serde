@@ -49,6 +49,7 @@ import org.json.JSONArray;
 import org.openx.data.jsonserde.json.JSONException;
 import org.openx.data.jsonserde.json.JSONObject;
 import org.openx.data.jsonserde.objectinspector.JsonObjectInspectorFactory;
+import org.openx.data.jsonserde.objectinspector.JsonStructObjectInspector;
 
 /**
  * Properties:
@@ -64,12 +65,15 @@ public class JsonSerDe implements SerDe {
     List<String> columnNames;
     List<TypeInfo> columnTypes;
     StructTypeInfo rowTypeInfo;
-    StructObjectInspector rowObjectInspector;
+    JsonStructObjectInspector rowObjectInspector;
     boolean[] columnSortOrderIsDesc;
     
-       // if set, will ignore malformed JSON in deserialization
+    // if set, will ignore malformed JSON in deserialization
     boolean ignoreMalformedJson = false;
-   public static final String PROP_IGNORE_MALFORMED_JSON = "ignore.malformed.json";
+    public static final String PROP_IGNORE_MALFORMED_JSON = "ignore.malformed.json";
+    // special column name for the full record
+    String completeRecordKey = null;
+    public static final String PROP_COMPLETE_RECORD_KEY = "complete.record.key";
     
 
     /**
@@ -107,7 +111,7 @@ public class JsonSerDe implements SerDe {
 
         // Create row related objects
         rowTypeInfo = (StructTypeInfo) TypeInfoFactory.getStructTypeInfo(columnNames, columnTypes);
-        rowObjectInspector = (StructObjectInspector) JsonObjectInspectorFactory.getJsonObjectInspectorFromTypeInfo(rowTypeInfo);
+        rowObjectInspector = (JsonStructObjectInspector) JsonObjectInspectorFactory.getJsonObjectInspectorFromTypeInfo(rowTypeInfo);
 
         // Get the sort order
         String columnSortOrder = tbl.getProperty(Constants.SERIALIZATION_SORT_ORDER);
@@ -119,6 +123,10 @@ public class JsonSerDe implements SerDe {
         
         // other configuration
         ignoreMalformedJson = Boolean.parseBoolean(tbl.getProperty(PROP_IGNORE_MALFORMED_JSON, "false"));
+        completeRecordKey = tbl.getProperty(PROP_COMPLETE_RECORD_KEY, null);
+        if (completeRecordKey != null) {
+          rowObjectInspector.setCompleteRecordKey(completeRecordKey);
+        }
         
     }
 

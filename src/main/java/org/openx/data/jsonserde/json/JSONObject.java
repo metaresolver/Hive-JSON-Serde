@@ -1630,4 +1630,25 @@ public class JSONObject {
             throw new JSONException(exception);
         }
      }
+
+  @Override
+  public boolean equals(Object obj) {
+      if (this == obj) {
+          return true;
+      }
+
+      if (!(obj instanceof JSONObject)) {
+          return false;
+      }
+
+      JSONObject that = (JSONObject)obj;
+      return this.map.equals(that.map);
+  }
+
+  @Override
+  public int hashCode() {
+      int hash = 7;
+      hash = 73 * hash + (this.map != null ? this.map.hashCode() : 0);
+      return hash;
+  }
 }

@@ -26,6 +26,7 @@ import org.openx.data.jsonserde.json.JSONObject;
  * @author rcongiu
  */
 public class JsonStructObjectInspector extends StandardStructObjectInspector {
+    private String completeRecordKey = null;
 
     public JsonStructObjectInspector(List<String> structFieldNames,
             List<ObjectInspector> structFieldObjectInspectors) {
@@ -44,6 +45,9 @@ public class JsonStructObjectInspector extends StandardStructObjectInspector {
         assert (fieldID >= 0 && fieldID < fields.size());
 
         try {
+            if (f.getFieldName().equals(completeRecordKey)) {
+              return obj.toString();
+            }
             return getField(obj, f.getFieldName());
         } catch (JSONException ex) {
             // if key does not exist
@@ -59,7 +63,11 @@ public class JsonStructObjectInspector extends StandardStructObjectInspector {
 
         for (int i = 0; i < fields.size(); i++) {
             try {
-                values.add(getField(jObj, fields.get(i).getFieldName()));
+                if (fields.get(i).getFieldName().equals(completeRecordKey)) {
+                    values.add(jObj.toString());
+                } else {
+                    values.add(getField(jObj, fields.get(i).getFieldName()));
+                }
             } catch (JSONException ex) {
                 // we're iterating through the keys so 
                 // this should never happen
@@ -95,4 +103,8 @@ public class JsonStructObjectInspector extends StandardStructObjectInspector {
             return jObj.get(fieldName);
         }
     }
+
+  public void setCompleteRecordKey(String completeRecordKey) {
+    this.completeRecordKey = completeRecordKey;
+  }
 }

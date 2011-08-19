@@ -58,6 +58,15 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>cloudera-releases</id>
+            <name>Cloudera Releases Repository</name>
+            <url>https://repository.cloudera.com/content/repositories/releases/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -66,15 +75,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>hive</groupId>
+            <groupId>org.apache.hadoop.hive</groupId>
             <artifactId>hive-serde</artifactId>
-            <version>0.6.0_trunk</version>
+            <version>0.7.1-cdh3u1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>hive</groupId>
+            <groupId>org.apache.hadoop.hive</groupId>
             <artifactId>hive-exec</artifactId>
-            <version>0.6.0_trunk</version>
+            <version>0.7.1-cdh3u1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

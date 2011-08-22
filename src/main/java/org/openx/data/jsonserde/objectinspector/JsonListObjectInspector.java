@@ -12,11 +12,13 @@
 
 package org.openx.data.jsonserde.objectinspector;
 
-import java.util.List;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.StandardListObjectInspector;
-import org.openx.data.jsonserde.json.JSONArray;
-import org.openx.data.jsonserde.json.JSONException;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.node.ArrayNode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -33,8 +35,11 @@ public class JsonListObjectInspector extends StandardListObjectInspector {
     if (data == null) {
       return null;
     }
-    JSONArray array = (JSONArray) data;
-    return array.getAsArrayList();
+    List<JsonNode> list = new ArrayList<JsonNode>();
+    for (JsonNode node : (ArrayNode) data) {
+      list.add(node);
+    }
+    return list;
   }
 
   @Override
@@ -42,12 +47,7 @@ public class JsonListObjectInspector extends StandardListObjectInspector {
     if (data == null) {
       return null;
     }
-    JSONArray array = (JSONArray) data;
-    try {
-        return array.get(index);
-    } catch(JSONException ex) {
-        return null;
-    }
+    return ((ArrayNode) data).get(index);
   }
 
   @Override
@@ -55,8 +55,7 @@ public class JsonListObjectInspector extends StandardListObjectInspector {
     if (data == null) {
       return -1;
     }
-    JSONArray array = (JSONArray) data;
-    return array.length();
+    return ((ArrayNode) data).size();
   }
     
 }

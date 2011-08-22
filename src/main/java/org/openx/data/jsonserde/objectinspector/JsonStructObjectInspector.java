@@ -11,16 +11,16 @@
  *======================================================================*/
 package org.openx.data.jsonserde.objectinspector;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.StandardStructObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
-import org.openx.data.jsonserde.json.JSONException;
-import org.openx.data.jsonserde.json.JSONObject;
+import org.codehaus.jackson.node.ObjectNode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * This Object Inspector is used to look into a JSonObject object.
+ * This Object Inspector is used to look into an ObjectNode.
  * We couldn't use StandardStructObjectInspector since that expects 
  * something that can be cast to an Array<Object>.
  * @author rcongiu
@@ -37,36 +37,18 @@ public class JsonStructObjectInspector extends StandardStructObjectInspector {
         if (data == null) {
             return null;
         }
-        JSONObject obj = (JSONObject) data;
+        ObjectNode obj = (ObjectNode) data;
         MyField f = (MyField) fieldRef;
-
-        int fieldID = f.getFieldID();
-        assert (fieldID >= 0 && fieldID < fields.size());
-
-        try {
-            return obj.get(f.getFieldName());
-        } catch (JSONException ex) {
-            // if key does not exist
-            return null;
-        }
+        return obj.get(f.getFieldName());
     }
-    static List<Object> values = new ArrayList<Object>();
 
     @Override
     public List<Object> getStructFieldsDataAsList(Object o) {
-        JSONObject jObj = (JSONObject) o;
-        values.clear();
-
-        for (int i = 0; i < fields.size(); i++) {
-            try {
-                values.add(jObj.get(fields.get(i).getFieldName()));
-            } catch (JSONException ex) {
-                // we're iterating through the keys so 
-                // this should never happen
-                return null;
-            }
+        ObjectNode obj = (ObjectNode) o;
+        List<Object> values = new ArrayList<Object>();
+        for (MyField field : fields) {
+            values.add(obj.get(field.getFieldName()));
         }
-
         return values;
     }
 }

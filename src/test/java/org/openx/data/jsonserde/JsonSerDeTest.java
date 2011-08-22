@@ -12,29 +12,30 @@
 
 package org.openx.data.jsonserde;
 
-import java.util.Map;
-import java.util.HashMap;
-import org.apache.hadoop.hive.serde2.SerDeException;
-import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.ArrayList;
-import org.openx.data.jsonserde.json.JSONArray;
-import org.apache.hadoop.io.Text;
-import org.openx.data.jsonserde.json.JSONException;
-import org.openx.data.jsonserde.json.JSONObject;
-import java.util.Properties;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.serde.Constants;
+import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspectorFactory;
+import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -82,14 +83,13 @@ public class JsonSerDeTest {
     public void testDeserialize() throws Exception {
         System.out.println("deserialize");
         Writable w = new Text("{\"one\":true,\"three\":[\"red\",\"yellow\",\"orange\"],\"two\":19.5,\"four\":\"poop\"}");
-        Object expResult = null;
-        JSONObject result = (JSONObject) instance.deserialize(w);
-        assertEquals(result.get("four"),"poop");
+        JsonNode result = (JsonNode) instance.deserialize(w);
+        assertEquals(result.get("four").getTextValue(), "poop");
+
+        assertTrue(result.get("three").isArray());
         
-        assertTrue( result.get("three") instanceof JSONArray);
-        
-        assertTrue( ((JSONArray)result.get("three")).get(0) instanceof String );
-        assertEquals( ((JSONArray)result.get("three")).get(0),"red");
+        assertTrue(result.get("three").get(0).isTextual());
+        assertEquals(result.get("three").get(0).getTextValue(), "red");
     }
 
  //   {"one":true,"three":["red","yellow",["blue","azure","cobalt","teal"],"orange"],"two":19.5,"four":"poop"}
@@ -97,14 +97,13 @@ public class JsonSerDeTest {
     @Test
     public void testDeserialize2() throws Exception {
         Writable w = new Text("{\"one\":true,\"three\":[\"red\",\"yellow\",[\"blue\",\"azure\",\"cobalt\",\"teal\"],\"orange\"],\"two\":19.5,\"four\":\"poop\"}");
-        Object expResult = null;
-        JSONObject result = (JSONObject) instance.deserialize(w);
-        assertEquals(result.get("four"),"poop");
-        
-        assertTrue( result.get("three") instanceof JSONArray);
-        
-        assertTrue( ((JSONArray)result.get("three")).get(0) instanceof String );
-        assertEquals( ((JSONArray)result.get("three")).get(0),"red");
+        JsonNode result = (JsonNode) instance.deserialize(w);
+        assertEquals(result.get("four").getTextValue(), "poop");
+
+        assertTrue(result.get("three").isArray());
+
+        assertTrue(result.get("three").get(0).isTextual());
+        assertEquals(result.get("three").get(0).getTextValue(), "red");
     }
 
     /**
@@ -137,7 +136,7 @@ public class JsonSerDeTest {
     
     
    // @Test
-    public void testSerialize() throws SerDeException, JSONException {
+    public void testSerialize() throws Exception {
         System.out.println("serialize");
         ArrayList row = new ArrayList(5);
         
@@ -180,11 +179,11 @@ public class JsonSerDeTest {
         StructObjectInspector soi = ObjectInspectorFactory.getStandardStructObjectInspector(fieldNames, lOi);
         
         Object result = instance.serialize(row, soi);
+
+        JsonNode res = new ObjectMapper().readTree(result.toString());
+        assertEquals(res.get("atext").getTextValue(), row.get(0));
         
-        JSONObject res = new JSONObject(result.toString());
-        assertEquals(res.getString("atext"), row.get(0));
-        
-        assertEquals(res.get("anumber") , row.get(1));
+        assertEquals(res.get("anumber").getNumberValue(), row.get(1));
         
         // after serialization the internal contents of JSONObject are destroyed (overwritten by their string representation
        // (for map and arrays) 

@@ -146,7 +146,8 @@ public class JsonSerDe implements SerDe {
         JSONObject jObj = null;
         
         try {
-            jObj = new JSONObject(rowText.toString()) {
+	    String row = rowText.toString().replace("\0", "");
+            jObj = new JSONObject(row) {
 
                 /**
                  * In Hive column names are case insensitive, so lower-case all

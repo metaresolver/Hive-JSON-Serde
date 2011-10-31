@@ -71,6 +71,8 @@ ALTER TABLE json_table SET SERDEPROPERTIES ( "ignore.malformed.json" = "true");
 it will not make the query fail, and the above record will be returned as
 NULL	null	null
 
+This is now the default behavior, unless the key is set to false.
+
 * COMPLETE RECORD KEY
 
 It may be desireable to have a column in your table that gives access to the complete JSON record. This can be done by setting the complete.record.key SerDe property and and adding a column to your table that matches the value of that setting:

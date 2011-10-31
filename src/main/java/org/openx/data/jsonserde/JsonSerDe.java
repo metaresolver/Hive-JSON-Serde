@@ -69,7 +69,7 @@ public class JsonSerDe implements SerDe {
     boolean[] columnSortOrderIsDesc;
     
     // if set, will ignore malformed JSON in deserialization
-    boolean ignoreMalformedJson = false;
+    boolean ignoreMalformedJson = true;
     public static final String PROP_IGNORE_MALFORMED_JSON = "ignore.malformed.json";
     // special column name for the full record
     String completeRecordKey = null;
@@ -122,7 +122,7 @@ public class JsonSerDe implements SerDe {
         
         
         // other configuration
-        ignoreMalformedJson = Boolean.parseBoolean(tbl.getProperty(PROP_IGNORE_MALFORMED_JSON, "false"));
+        ignoreMalformedJson = Boolean.parseBoolean(tbl.getProperty(PROP_IGNORE_MALFORMED_JSON, "true"));
         completeRecordKey = tbl.getProperty(PROP_COMPLETE_RECORD_KEY, null);
         if (completeRecordKey != null) {
           rowObjectInspector.setCompleteRecordKey(completeRecordKey);

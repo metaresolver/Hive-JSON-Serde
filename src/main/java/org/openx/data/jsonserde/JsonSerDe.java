@@ -162,7 +162,7 @@ public class JsonSerDe implements SerDe {
                     return super.put(key.toLowerCase(), value);
                 }
             };
-        } catch (JSONException e) {
+        } catch (Exception e) {
             // If row is not a JSON object, make the whole row NULL
             onMalformedJson("Row is not a valid JSON Object - JSONException: "
                     + e.getMessage());

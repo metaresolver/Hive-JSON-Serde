@@ -30,15 +30,15 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
  * @author rcongiu
  */
 public class JsonObjectInspectorFactory {
-   
+
 
     static HashMap<TypeInfo, ObjectInspector> cachedJsonObjectInspector = new HashMap<TypeInfo, ObjectInspector>();
     /**
-     * 
-     * 
+     *
+     *
      * @see JsonUtils
      * @param typeInfo
-     * @return 
+     * @return
      */
     public static ObjectInspector getJsonObjectInspectorFromTypeInfo(
             TypeInfo typeInfo) {
@@ -46,8 +46,7 @@ public class JsonObjectInspectorFactory {
         if (result == null) {
             switch (typeInfo.getCategory()) {
                 case PRIMITIVE: {
-                    result = 
-                            getPrimitiveJavaObjectInspector(((PrimitiveTypeInfo) typeInfo).getPrimitiveCategory());
+                    result = PrimitiveJSONObjectInspectorFactory.getPrimitiveJavaObjectInspector(((PrimitiveTypeInfo) typeInfo).getPrimitiveCategory());
                     break;
                 }
                 case LIST: {
@@ -81,15 +80,16 @@ public class JsonObjectInspectorFactory {
                 }
             }
             cachedJsonObjectInspector.put(typeInfo, result);
-        } 
+        }
         return result;
     }
-    
-    
+
+
+
     /*
      * Caches Struct Object Inspectors
      */
-    static HashMap<ArrayList<List<?>>, JsonStructObjectInspector> 
+    static HashMap<ArrayList<List<?>>, JsonStructObjectInspector>
             cachedStandardStructObjectInspector =
             new HashMap<ArrayList<List<?>>, JsonStructObjectInspector>();
 
@@ -107,12 +107,12 @@ public class JsonObjectInspectorFactory {
         }
         return result;
     }
-    
+
     /*
      * Caches the List objecvt inspectors
      */
-  static HashMap<ArrayList<Object>, JsonListObjectInspector> 
-          cachedJsonListObjectInspector = 
+  static HashMap<ArrayList<Object>, JsonListObjectInspector>
+          cachedJsonListObjectInspector =
           new HashMap<ArrayList<Object>, JsonListObjectInspector>();
 
   public static JsonListObjectInspector getJsonListObjectInspector(
@@ -131,9 +131,9 @@ public class JsonObjectInspectorFactory {
   /*
    * Caches Map ObjectInspectors
    */
-  
-  static HashMap<ArrayList<Object>, JsonMapObjectInspector> 
-          cachedJsonMapObjectInspector = 
+
+  static HashMap<ArrayList<Object>, JsonMapObjectInspector>
+          cachedJsonMapObjectInspector =
           new HashMap<ArrayList<Object>, JsonMapObjectInspector>();
 
   public static JsonMapObjectInspector getJsonMapObjectInspector(
@@ -151,21 +151,5 @@ public class JsonObjectInspectorFactory {
     }
     return result;
   }
-  
-  static JsonStringJavaObjectInspector cachedStringObjectInspector = new JsonStringJavaObjectInspector();  
-  
-  public static AbstractPrimitiveJavaObjectInspector getPrimitiveJavaObjectInspector(
-      PrimitiveCategory primitiveCategory) {
-      
-      if( primitiveCategory.equals(primitiveCategory.STRING) ) {
-          return cachedStringObjectInspector;
-      } else {
-          return PrimitiveObjectInspectorFactory.
-                            getPrimitiveJavaObjectInspector(primitiveCategory);
-          
-     }
-   
-  }
 
-  
 }

@@ -21,7 +21,7 @@ import org.openx.data.jsonserde.json.JSONObject;
 
 /**
  * This Object Inspector is used to look into a JSonObject object.
- * We couldn't use StandardStructObjectInspector since that expects 
+ * We couldn't use StandardStructObjectInspector since that expects
  * something that can be cast to an Array<Object>.
  * @author rcongiu
  */
@@ -61,7 +61,7 @@ public class JsonStructObjectInspector extends StandardStructObjectInspector {
         JSONObject jObj = (JSONObject) o;
         values.clear();
 
-        for (int i = 0; i < fields.size(); i++) {
+        for(int i =0; i< fields.size(); i ++) {
             try {
                 if (fields.get(i).getFieldName().equals(completeRecordKey)) {
                     values.add(jObj.toString());
@@ -69,12 +69,14 @@ public class JsonStructObjectInspector extends StandardStructObjectInspector {
                     values.add(getField(jObj, fields.get(i).getFieldName()));
                 }
             } catch (JSONException ex) {
-                // we're iterating through the keys so 
-                // this should never happen
-                return null;
-            }
-        }
-
+		try{
+		    values.add(jObj.get(fields.get(i).getFieldName().replaceAll("_", "-")));
+		} catch(JSONException ex2){
+                    // this can happen if a key doesn't exist in the json object
+                    // not totally out of the bounds of imagination for log data.
+                }
+	    }
+	}
         return values;
     }
 

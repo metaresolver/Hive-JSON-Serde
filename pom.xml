@@ -75,13 +75,13 @@
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop.hive</groupId>
-            <artifactId>hive-exec</artifactId>
+            <artifactId>hive-serde</artifactId>
             <version>0.7.1-cdh3u3</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop.hive</groupId>
-            <artifactId>hive-serde</artifactId>
+            <artifactId>hive-exec</artifactId>
             <version>0.7.1-cdh3u3</version>
             <scope>provided</scope>
         </dependency>

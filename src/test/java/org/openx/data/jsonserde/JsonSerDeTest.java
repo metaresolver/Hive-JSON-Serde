@@ -63,7 +63,10 @@ public class JsonSerDeTest {
     }
 
     static JsonSerDe instance;
- 
+    
+    static String defaultColumns = "one,two,three,four";
+    static String defaultColumnTypes = "int,boolean,array<string>,string";
+
     static public void initialize() throws Exception {
         System.out.println("initialize");
         instance = new JsonSerDe();
@@ -73,6 +76,53 @@ public class JsonSerDeTest {
         tbl.setProperty(Constants.LIST_COLUMN_TYPES, "boolean,float,array<string>,string");
         
         instance.initialize(conf, tbl);
+    }
+    static public void alternateInitialize(String cols, String colTypes) throws Exception{
+        System.out.println("initialize");
+        instance = new JsonSerDe();
+        Configuration conf = null;
+        Properties tbl = new Properties();
+        tbl.setProperty(Constants.LIST_COLUMNS, cols);
+        tbl.setProperty(Constants.LIST_COLUMN_TYPES, colTypes);
+        
+        instance.initialize(conf, tbl);   
+    }
+
+    @Test(expected=JSONException.class)
+    public void testShouldDropValuesWhenWrongBasicType() throws Exception{
+        alternateInitialize(defaultColumns, defaultColumnTypes);
+        Writable w = new Text("{\"one\":true, \"two\": true}");
+        JSONObject result = (JSONObject) instance.deserialize(w);
+        assertEquals(result.get("two"), true);
+        result.get("one");
+    }
+
+    @Test
+    public void testShouldntDropFieldWhenExpectsString() throws Exception{
+        alternateInitialize(defaultColumns, "string,string,array<string>,string");
+        Writable w = new Text("{\"one\":23, \"two\": true}");
+        JSONObject result = (JSONObject) instance.deserialize(w);
+        assertEquals(result.get("two"), true);
+        assertEquals(result.get("one"), 23);
+    }
+
+    @Test
+    public void testColumnNameReplacements() throws Exception{
+        System.out.println("initialize");
+        instance = new JsonSerDe();
+        Configuration conf = null;
+        String cols = "dt,from_field,name,age";
+        String colTypes = "string,string,string,string";
+        Properties tbl = new Properties();
+        tbl.setProperty(Constants.LIST_COLUMNS, cols);
+        tbl.setProperty(Constants.LIST_COLUMN_TYPES, colTypes);
+        tbl.setProperty(JsonSerDe.PROP_COLUMN_MAPPINGS, "date:dt, from: from_field");
+        instance.initialize(conf, tbl);
+        Writable w = new Text("{\"date\":\"2011-10-12\",\"from\":\"matthew\"}");
+        JSONObject result = (JSONObject) instance.deserialize(w);
+        System.out.println(result.toString());
+        assertEquals(result.get("dt"), "2011-10-12");
+        assertEquals(result.get("from_field"), "matthew");
     }
 
     /**
@@ -117,6 +167,14 @@ public class JsonSerDeTest {
         Class result = instance.getSerializedClass();
         assertEquals(expResult, result);
        
+    }
+
+    @Test
+    public void testDeserializeWithBase16Numbers() throws Exception{
+        System.out.println("deserialization craziness test:");
+        String data = "{\"hello\":\"\\uA8?1\"}";
+        JSONObject j = new JSONObject(data);
+        assertEquals(j.get("hello"), "\\uA8?1");
     }
 
     /**

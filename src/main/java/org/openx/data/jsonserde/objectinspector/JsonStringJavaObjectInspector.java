@@ -17,9 +17,11 @@ import org.apache.hadoop.hive.serde2.objectinspector.primitive.PrimitiveObjectIn
 import org.apache.hadoop.hive.serde2.objectinspector.primitive.SettableStringObjectInspector;
 import org.apache.hadoop.io.Text;
 
+import org.codehaus.jackson.JsonNode;
+
 /**
- * This String ObjectInspector was built to tolerate non-string values 
- * and treat them as strings. 
+ * This String ObjectInspector was built to tolerate non-string values
+ * and treat them as strings.
  * @author rcongiu
  */
 public class JsonStringJavaObjectInspector extends
@@ -32,12 +34,21 @@ public class JsonStringJavaObjectInspector extends
 
   @Override
   public Text getPrimitiveWritableObject(Object o) {
-    return o == null ? null : new Text(((String) o.toString()));
+    if (o == null)
+      return null;
+    else
+      return new Text(getPrimitiveJavaObject(o));
   }
 
   @Override
   public String getPrimitiveJavaObject(Object o) {
-    return (String) o.toString();
+    JsonNode node = (JsonNode) o;
+    if (node == null)
+      return null;
+    else if (node.isValueNode())
+      return node.getValueAsText(); // outputs unquoted Strings
+    else
+      return node.toString();
   }
 
   @Override
@@ -59,5 +70,5 @@ public class JsonStringJavaObjectInspector extends
   public Object set(Object o, String value) {
     return value;
   }
-    
+
 }

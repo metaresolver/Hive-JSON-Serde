@@ -136,7 +136,12 @@ public class JsonSerDe implements SerDe {
 	    for (String p : paths.split(",")) {
 		columnPaths.add(p.trim().split("\\."));
 	    }
-	    // TODO: assert columnPaths.size == columnNames.size
+	    if (columnPaths.size() != columnNames.size()) {
+		throw new IllegalArgumentException("Every column in table must be in JSON 'paths' override, when 'paths' is preset.");
+	    }
+	    if (underscoresArePaths) {
+		throw new IllegalArgumentException("Cannot specify both JSON 'paths' override and 'underscores-are-paths' at the same time.");
+	    }
 	}
     }
 

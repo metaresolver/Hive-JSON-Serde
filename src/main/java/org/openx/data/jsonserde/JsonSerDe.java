@@ -55,7 +55,7 @@ import java.util.Properties;
  * Properties:
  * ignore.malformed.json = true/false : malformed json will be ignored
  *         instead of throwing an exception
- * 
+ *
  * @author rcongiu
  */
 public class JsonSerDe implements SerDe {
@@ -73,16 +73,16 @@ public class JsonSerDe implements SerDe {
 
     // if set, will ignore malformed JSON in deserialization
     public static final String PROP_IGNORE_MALFORMED_JSON = "ignore.malformed.json";
-    boolean ignoreMalformedJson = false;
+    boolean ignoreMalformedJson = true;
 
     /**
      * Initializes the SerDe.
      * Gets the list of columns and their types from the table properties.
      * Will use them to look into/create JSON data.
-     * 
+     *
      * @param conf Hadoop configuration object
      * @param tbl  Table Properties
-     * @throws SerDeException 
+     * @throws SerDeException
      */
     @Override
     public void initialize(Configuration conf, Properties tbl) throws SerDeException {
@@ -113,7 +113,7 @@ public class JsonSerDe implements SerDe {
         }
 
         // other configuration
-        ignoreMalformedJson = Boolean.parseBoolean(tbl.getProperty(PROP_IGNORE_MALFORMED_JSON, "false"));
+        ignoreMalformedJson = Boolean.parseBoolean(tbl.getProperty(PROP_IGNORE_MALFORMED_JSON, "true"));
     }
 
     @Override
@@ -151,15 +151,15 @@ public class JsonSerDe implements SerDe {
     /**
      * Hive will call this to serialize an object. Returns a writable object
      * of the same class returned by {@link #getSerializedClass}
-     * 
+     *
      * @param obj The object to serialize
      * @param objInspector The ObjectInspector that knows about the object's structure
-     * @return a serialized object in form of a Writable. Must be the 
+     * @return a serialized object in form of a Writable. Must be the
      *         same type returned by {@link #getSerializedClass}
-     * @throws SerDeException 
+     * @throws SerDeException
      */
     @Override
-    public Writable serialize(Object obj, ObjectInspector objInspector) throws SerDeException {        
+    public Writable serialize(Object obj, ObjectInspector objInspector) throws SerDeException {
         // make sure it is a struct record
         if (objInspector.getCategory() != Category.STRUCT) {
             throw new SerDeException(getClass().toString()
@@ -195,8 +195,8 @@ public class JsonSerDe implements SerDe {
 
     /**
      * Serializes a field. Since we have nested structures, it may be called
-     * recursively for instance when defining a list<struct<>> 
-     * 
+     * recursively for instance when defining a list<struct<>>
+     *
      * @param obj Object holding the fields' content
      * @param oi  The field's objec inspector
      * @return content node

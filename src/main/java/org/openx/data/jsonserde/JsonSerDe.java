@@ -58,7 +58,11 @@ import java.util.Properties;
 /**
  * Properties:
  * ignore.malformed.json = true/false : malformed json will be ignored
- *         instead of throwing an exception
+ *         instead of throwing an exception. Default: true
+ * underscores-are-paths = ture/false : turn underscores in column names into
+ *         JSON path separators
+ * paths = col1.json.path, col2.another.field... : list explicit JSON path for
+ *         every column, same as Amazon Hive JSON SerDe.
  *
  * @author rcongiu
  */

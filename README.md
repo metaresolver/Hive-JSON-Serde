@@ -55,7 +55,6 @@ CREATE TABLE moo (
 You can also define nested structures:
 ```sql
 ADD JAR s3://foo/json-serde-1.1-SNAPSHOT-jar-with-dependencies.jar;
-
 CREATE TABLE json_nested_test (
 	country string,
 	languages array<string>,

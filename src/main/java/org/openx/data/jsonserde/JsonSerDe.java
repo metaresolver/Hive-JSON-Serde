@@ -43,6 +43,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
+import org.codehaus.jackson.node.MissingNode;
 
 import org.openx.data.jsonserde.objectinspector.JsonObjectInspectorFactory;
 
@@ -50,6 +51,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -77,6 +79,8 @@ public class JsonSerDe implements SerDe {
     // if set, will ignore malformed JSON in deserialization
     public static final String PROP_IGNORE_MALFORMED_JSON = "ignore.malformed.json";
     boolean ignoreMalformedJson = true;
+
+    boolean underscoresArePaths;
 
     /**
      * Initializes the SerDe.
@@ -118,15 +122,38 @@ public class JsonSerDe implements SerDe {
         // other configuration
         ignoreMalformedJson = Boolean.parseBoolean(tbl.getProperty(PROP_IGNORE_MALFORMED_JSON, "true"));
 
-	// override paths
-	String paths = tbl.getProperty("paths");
-	if (paths != null) {
+	// turn underscore column names into overriden paths
+	underscoresArePaths = Boolean.parseBoolean(tbl.getProperty("underscores-are-paths", "false"));
+	if (underscoresArePaths) {
+	    columnPaths = new ArrayList<String[]>();
+	    for (String p : columnNames) {
+		columnPaths.add(p.trim().split("_"));
+	    }
+	} else if (tbl.containsKey("paths")) {
+	    // "paths" serdeproperty overrides paths
+	    String paths = tbl.getProperty("paths");
 	    columnPaths = new ArrayList<String[]>();
 	    for (String p : paths.split(",")) {
 		columnPaths.add(p.trim().split("\\."));
 	    }
 	    // TODO: assert columnPaths.size == columnNames.size
 	}
+    }
+
+    /**
+     * Hive columns are case insensitive, and further, toLowerCase'd by someone
+     * on my List, before passed to the SerDe... JSON paths are case sensitive.
+     * This thus finds JSON paths in a case insensitive manner.
+     */
+    private JsonNode getPathIgnoreCase(JsonNode node, String path) {
+	Iterator<String> i = node.getFieldNames();
+	while (i.hasNext()) {
+	    String field = i.next();
+	    if (field.equalsIgnoreCase(path)) {
+		return node.path(field);
+	    }
+	}
+	return MissingNode.getInstance();
     }
 
     @Override
@@ -147,7 +174,10 @@ public class JsonSerDe implements SerDe {
 
 		    JsonNode node = root;
 		    for (String p : paths) {
-			node = node.path(p);
+			if (underscoresArePaths)
+			    node = getPathIgnoreCase(node, p);
+			else
+			    node = node.path(p);
 		    }
 		    if (!node.isMissingNode()) {
 			output.put(columnName, node);

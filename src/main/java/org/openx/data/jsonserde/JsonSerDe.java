@@ -43,11 +43,13 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.ObjectNode;
+
 import org.openx.data.jsonserde.objectinspector.JsonObjectInspectorFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
 
@@ -70,6 +72,7 @@ public class JsonSerDe implements SerDe {
     StructTypeInfo rowTypeInfo;
     StructObjectInspector rowObjectInspector;
     boolean[] columnSortOrderIsDesc;
+    List<String[]> columnPaths;
 
     // if set, will ignore malformed JSON in deserialization
     public static final String PROP_IGNORE_MALFORMED_JSON = "ignore.malformed.json";
@@ -114,6 +117,16 @@ public class JsonSerDe implements SerDe {
 
         // other configuration
         ignoreMalformedJson = Boolean.parseBoolean(tbl.getProperty(PROP_IGNORE_MALFORMED_JSON, "true"));
+
+	// override paths
+	String paths = tbl.getProperty("paths");
+	if (paths != null) {
+	    columnPaths = new ArrayList<String[]>();
+	    for (String p : paths.split(",")) {
+		columnPaths.add(p.trim().split("\\."));
+	    }
+	    // TODO: assert columnPaths.size == columnNames.size
+	}
     }
 
     @Override
@@ -123,7 +136,25 @@ public class JsonSerDe implements SerDe {
         }
 
         try {
-            return mapper.readTree(w.toString());
+	    if (columnPaths == null) {
+		return mapper.readTree(w.toString());
+	    } else {
+		JsonNode root = mapper.readTree(w.toString());
+		ObjectNode output = mapper.createObjectNode();
+		for (int i = 0; i < columnPaths.size(); i++) {
+		    String[] paths = columnPaths.get(i);
+		    String columnName = columnNames.get(i);
+
+		    JsonNode node = root;
+		    for (String p : paths) {
+			node = node.path(p);
+		    }
+		    if (!node.isMissingNode()) {
+			output.put(columnName, node);
+		    }
+		}
+		return output;
+	    }
         }
         catch (IOException e) {
             if (ignoreMalformedJson) {

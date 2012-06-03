@@ -183,10 +183,20 @@ public class JsonSerDe implements SerDe {
 
 					JsonNode node = root;
 					for (String p : paths) {
-						if (underscoresArePaths)
+						// a single digit path is an array index
+						if (Character.isDigit(p.charAt(0)) && p.length() == 1) {
+							int arrayIndex = Character.getNumericValue(p.charAt(0));
+							if (node.isArray() && node.size() > arrayIndex) {
+								node = node.get(arrayIndex);
+							} else {
+								node = MissingNode.getInstance();
+								break;
+							}
+						} else if (underscoresArePaths) {
 							node = getPathIgnoreCase(node, p);
-						else
+						} else {
 							node = node.path(p);
+						}
 					}
 					if (!node.isMissingNode()) {
 						output.put(columnName, node);

@@ -126,27 +126,27 @@ public class JsonSerDe implements SerDe {
         // other configuration
         ignoreMalformedJson = Boolean.parseBoolean(tbl.getProperty(PROP_IGNORE_MALFORMED_JSON, "true"));
 
-	// turn underscore column names into overriden paths
-	underscoresArePaths = Boolean.parseBoolean(tbl.getProperty("underscores-are-paths", "false"));
-	if (underscoresArePaths) {
-	    columnPaths = new ArrayList<String[]>();
-	    for (String p : columnNames) {
-		columnPaths.add(p.trim().split("_"));
-	    }
-	} else if (tbl.containsKey("paths")) {
-	    // "paths" serdeproperty overrides paths
-	    String paths = tbl.getProperty("paths");
-	    columnPaths = new ArrayList<String[]>();
-	    for (String p : paths.split(",")) {
-		columnPaths.add(p.trim().split("\\."));
-	    }
-	    if (columnPaths.size() != columnNames.size()) {
-		throw new IllegalArgumentException("Every column in table must be in JSON 'paths' override, when 'paths' is preset.");
-	    }
-	    if (underscoresArePaths) {
-		throw new IllegalArgumentException("Cannot specify both JSON 'paths' override and 'underscores-are-paths' at the same time.");
-	    }
-	}
+		// turn underscore column names into overriden paths
+		underscoresArePaths = Boolean.parseBoolean(tbl.getProperty("underscores-are-paths", "false"));
+		if (underscoresArePaths) {
+			columnPaths = new ArrayList<String[]>();
+			for (String p : columnNames) {
+				columnPaths.add(p.trim().split("_"));
+			}
+		} else if (tbl.containsKey("paths")) {
+			// "paths" serdeproperty overrides paths
+			String paths = tbl.getProperty("paths");
+			columnPaths = new ArrayList<String[]>();
+			for (String p : paths.split(",")) {
+				columnPaths.add(p.trim().split("\\."));
+			}
+			if (columnPaths.size() != columnNames.size()) {
+				throw new IllegalArgumentException("Every column in table must be in JSON 'paths' override, when 'paths' is preset.");
+			}
+			if (underscoresArePaths) {
+				throw new IllegalArgumentException("Cannot specify both JSON 'paths' override and 'underscores-are-paths' at the same time.");
+			}
+		}
     }
 
     /**
@@ -155,14 +155,14 @@ public class JsonSerDe implements SerDe {
      * This thus finds JSON paths in a case insensitive manner.
      */
     private JsonNode getPathIgnoreCase(JsonNode node, String path) {
-	Iterator<String> i = node.getFieldNames();
-	while (i.hasNext()) {
-	    String field = i.next();
-	    if (field.equalsIgnoreCase(path)) {
-		return node.path(field);
-	    }
-	}
-	return MissingNode.getInstance();
+		Iterator<String> i = node.getFieldNames();
+		while (i.hasNext()) {
+			String field = i.next();
+			if (field.equalsIgnoreCase(path)) {
+				return node.path(field);
+			}
+		}
+		return MissingNode.getInstance();
     }
 
     @Override
@@ -172,28 +172,28 @@ public class JsonSerDe implements SerDe {
         }
 
         try {
-	    if (columnPaths == null) {
-		return mapper.readTree(w.toString());
-	    } else {
-		JsonNode root = mapper.readTree(w.toString());
-		ObjectNode output = mapper.createObjectNode();
-		for (int i = 0; i < columnPaths.size(); i++) {
-		    String[] paths = columnPaths.get(i);
-		    String columnName = columnNames.get(i);
+			if (columnPaths == null) {
+				return mapper.readTree(w.toString());
+			} else {
+				JsonNode root = mapper.readTree(w.toString());
+				ObjectNode output = mapper.createObjectNode();
+				for (int i = 0; i < columnPaths.size(); i++) {
+					String[] paths = columnPaths.get(i);
+					String columnName = columnNames.get(i);
 
-		    JsonNode node = root;
-		    for (String p : paths) {
-			if (underscoresArePaths)
-			    node = getPathIgnoreCase(node, p);
-			else
-			    node = node.path(p);
-		    }
-		    if (!node.isMissingNode()) {
-			output.put(columnName, node);
-		    }
-		}
-		return output;
-	    }
+					JsonNode node = root;
+					for (String p : paths) {
+						if (underscoresArePaths)
+							node = getPathIgnoreCase(node, p);
+						else
+							node = node.path(p);
+					}
+					if (!node.isMissingNode()) {
+						output.put(columnName, node);
+					}
+				}
+				return output;
+			}
         }
         catch (IOException e) {
             if (ignoreMalformedJson) {
@@ -233,8 +233,8 @@ public class JsonSerDe implements SerDe {
         // make sure it is a struct record
         if (objInspector.getCategory() != Category.STRUCT) {
             throw new SerDeException(getClass().toString()
-                    + " can only serialize struct types, but we got: "
-                    + objInspector.getTypeName());
+									 + " can only serialize struct types, but we got: "
+									 + objInspector.getTypeName());
         }
 
         JsonNode node = serializeStruct(obj, (StructObjectInspector) objInspector, columnNames);
@@ -277,38 +277,38 @@ public class JsonSerDe implements SerDe {
         }
 
         switch (oi.getCategory()) {
-            case PRIMITIVE:
-                PrimitiveObjectInspector poi = (PrimitiveObjectInspector) oi;
-                switch (poi.getPrimitiveCategory()) {
-                    case VOID:
-                        return dummyNode.nullNode();
-                    case BOOLEAN:
-                        return dummyNode.booleanNode(((BooleanObjectInspector) poi).get(obj));
-                    case BYTE:
-                        return dummyNode.numberNode(((ShortObjectInspector) poi).get(obj));
-                    case DOUBLE:
-                        return dummyNode.numberNode(((DoubleObjectInspector) poi).get(obj));
-                    case FLOAT:
-                        return dummyNode.numberNode(((FloatObjectInspector) poi).get(obj));
-                    case INT:
-                        return dummyNode.numberNode(((IntObjectInspector) poi).get(obj));
-                    case LONG:
-                        return dummyNode.numberNode(((LongObjectInspector) poi).get(obj));
-                    case SHORT:
-                        return dummyNode.numberNode(((ShortObjectInspector) poi).get(obj));
-                    case STRING:
-                        return dummyNode.textNode(((StringObjectInspector) poi).getPrimitiveJavaObject(obj));
-                    default:
-                        throw new IllegalStateException("Unhandled primitive: " + poi.getPrimitiveCategory());
-                }
-            case MAP:
-                return serializeMap(obj, (MapObjectInspector) oi);
-            case LIST:
-                return serializeList(obj, (ListObjectInspector) oi);
-            case STRUCT:
-                return serializeStruct(obj, (StructObjectInspector) oi, null);
-            default:
-                throw new IllegalStateException("Unhandled category: " + oi.getCategory());
+		case PRIMITIVE:
+			PrimitiveObjectInspector poi = (PrimitiveObjectInspector) oi;
+			switch (poi.getPrimitiveCategory()) {
+			case VOID:
+				return dummyNode.nullNode();
+			case BOOLEAN:
+				return dummyNode.booleanNode(((BooleanObjectInspector) poi).get(obj));
+			case BYTE:
+				return dummyNode.numberNode(((ShortObjectInspector) poi).get(obj));
+			case DOUBLE:
+				return dummyNode.numberNode(((DoubleObjectInspector) poi).get(obj));
+			case FLOAT:
+				return dummyNode.numberNode(((FloatObjectInspector) poi).get(obj));
+			case INT:
+				return dummyNode.numberNode(((IntObjectInspector) poi).get(obj));
+			case LONG:
+				return dummyNode.numberNode(((LongObjectInspector) poi).get(obj));
+			case SHORT:
+				return dummyNode.numberNode(((ShortObjectInspector) poi).get(obj));
+			case STRING:
+				return dummyNode.textNode(((StringObjectInspector) poi).getPrimitiveJavaObject(obj));
+			default:
+				throw new IllegalStateException("Unhandled primitive: " + poi.getPrimitiveCategory());
+			}
+		case MAP:
+			return serializeMap(obj, (MapObjectInspector) oi);
+		case LIST:
+			return serializeList(obj, (ListObjectInspector) oi);
+		case STRUCT:
+			return serializeStruct(obj, (StructObjectInspector) oi, null);
+		default:
+			throw new IllegalStateException("Unhandled category: " + oi.getCategory());
         }
     }
 

@@ -21,14 +21,14 @@ import java.util.List;
 
 /**
  * This Object Inspector is used to look into an ObjectNode.
- * We couldn't use StandardStructObjectInspector since that expects 
+ * We couldn't use StandardStructObjectInspector since that expects
  * something that can be cast to an Array<Object>.
  * @author rcongiu
  */
 public class JsonStructObjectInspector extends StandardStructObjectInspector {
 
     public JsonStructObjectInspector(List<String> structFieldNames,
-            List<ObjectInspector> structFieldObjectInspectors) {
+									 List<ObjectInspector> structFieldObjectInspectors) {
         super(structFieldNames, structFieldObjectInspectors);
     }
 

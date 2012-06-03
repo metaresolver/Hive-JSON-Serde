@@ -23,36 +23,36 @@ import java.util.Map;
  * @author rcongiu
  */
 public class JsonMapObjectInspector extends StandardMapObjectInspector {
-  
-    public JsonMapObjectInspector(ObjectInspector mapKeyObjectInspector, 
-            ObjectInspector mapValueObjectInspector) {
+
+    public JsonMapObjectInspector(ObjectInspector mapKeyObjectInspector,
+								  ObjectInspector mapValueObjectInspector) {
         super(mapKeyObjectInspector, mapValueObjectInspector);
     }
 
 
-  @Override
-  public Map<?, ?> getMap(Object data) {
-    if (data == null) {
-      return null;
-    }
-    final ObjectNode node = (ObjectNode) data;
+	@Override
+	public Map<?, ?> getMap(Object data) {
+		if (data == null) {
+			return null;
+		}
+		final ObjectNode node = (ObjectNode) data;
 
-      return new ObjectNodeMapAdapter(node);
-  }
+		return new ObjectNodeMapAdapter(node);
+	}
 
-  @Override
-  public int getMapSize(Object data) {
-    if (data == null) {
-      return -1;
-    }
-    return ((ObjectNode) data).size();
-  }
+	@Override
+	public int getMapSize(Object data) {
+		if (data == null) {
+			return -1;
+		}
+		return ((ObjectNode) data).size();
+	}
 
-  @Override
-  public Object getMapValueElement(Object data, Object key) {
-    if (data == null) {
-      return -1;
-    }
-    return ((ObjectNode) data).get(key.toString());
-  }
+	@Override
+	public Object getMapValueElement(Object data, Object key) {
+		if (data == null) {
+			return -1;
+		}
+		return ((ObjectNode) data).get(key.toString());
+	}
 }

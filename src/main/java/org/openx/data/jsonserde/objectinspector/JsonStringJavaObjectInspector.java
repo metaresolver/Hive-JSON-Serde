@@ -24,51 +24,51 @@ import org.codehaus.jackson.JsonNode;
  * and treat them as strings.
  * @author rcongiu
  */
-public class JsonStringJavaObjectInspector extends
-    AbstractPrimitiveJavaObjectInspector implements
-    SettableStringObjectInspector {
+public class JsonStringJavaObjectInspector
+	extends AbstractPrimitiveJavaObjectInspector
+	implements SettableStringObjectInspector {
 
-  JsonStringJavaObjectInspector() {
-    super(PrimitiveObjectInspectorUtils.stringTypeEntry);
-  }
+	JsonStringJavaObjectInspector() {
+		super(PrimitiveObjectInspectorUtils.stringTypeEntry);
+	}
 
-  @Override
-  public Text getPrimitiveWritableObject(Object o) {
-    if (o == null)
-      return null;
-    else
-      return new Text(getPrimitiveJavaObject(o));
-  }
+	@Override
+	public Text getPrimitiveWritableObject(Object o) {
+		if (o == null)
+			return null;
+		else
+			return new Text(getPrimitiveJavaObject(o));
+	}
 
-  @Override
-  public String getPrimitiveJavaObject(Object o) {
-    JsonNode node = (JsonNode) o;
-    if (node == null)
-      return null;
-    else if (node.isValueNode())
-      return node.getValueAsText(); // outputs unquoted Strings
-    else
-      return node.toString();
-  }
+	@Override
+	public String getPrimitiveJavaObject(Object o) {
+		JsonNode node = (JsonNode) o;
+		if (node == null)
+			return null;
+		else if (node.isValueNode())
+			return node.getValueAsText(); // outputs unquoted Strings
+		else
+			return node.toString();
+	}
 
-  @Override
-  public Object create(Text value) {
-    return value == null ? null : value.toString();
-  }
+	@Override
+	public Object create(Text value) {
+		return value == null ? null : value.toString();
+	}
 
-  @Override
-  public Object set(Object o, Text value) {
-    return value == null ? null : value.toString();
-  }
+	@Override
+	public Object set(Object o, Text value) {
+		return value == null ? null : value.toString();
+	}
 
-  @Override
-  public Object create(String value) {
-    return value;
-  }
+	@Override
+	public Object create(String value) {
+		return value;
+	}
 
-  @Override
-  public Object set(Object o, String value) {
-    return value;
-  }
+	@Override
+	public Object set(Object o, String value) {
+		return value;
+	}
 
 }

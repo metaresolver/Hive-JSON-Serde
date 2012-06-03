@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Set;
 
 class ObjectNodeMapAdapter
-        extends AbstractMap
-{
+	extends AbstractMap {
+
     private final ObjectNode node;
     private Set<JsonNode> entries;
 

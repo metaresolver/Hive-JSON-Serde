@@ -6,7 +6,7 @@ Serialization/Deserialization module for Apache Hadoop Hive
 
 This module allows hive to read and write in JSON format (see http://json.org for more info).
 
-Features:
+FEATURES
 ---------
 * Read data stored in JSON format
 * Convert data to JSON format when INSERT INTO table
@@ -35,8 +35,7 @@ ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
 STORED AS TEXTFILE;
 ```
 
-* Extract the foo field from the first element of an array
-Or null if it does not exist.
+* Extract the foo field from the first element of an array (or null if it does not exist).
 ```sql
 CREATE TABLE json_test1 (
 	three_0_foo string)
@@ -72,10 +71,13 @@ ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
 STORED AS TEXTFILE;
 ```
 
+KNOWN BUGS
+----------
+TODO: Extracting non-string fields as anything other than strings (ie: int's) seems to be broken.
+
 MALFORMED DATA
 --------------
 The default behavior on malformed data is to return null for every column on that row.
-
 
 ARCHITECTURE
 ------------
@@ -90,7 +92,3 @@ http://www.congiu.com/articles/json_serde
 THANKS
 ------
 Thanks to Douglas Crockford for the liberal license for his JSON library, and thanks to my employer OpenX and my boss Michael Lum for letting me open source the code.
-
-
-
-

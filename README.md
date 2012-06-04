@@ -14,6 +14,7 @@ Features:
 * nested data structures are also supported.
 * can rename columns, or extract nested JSON to a top level column, by two methods (either an explicit path or with _'s in the field name). Renaming is also useful for JSON fields that are reserved words in Hive.
 * bad JSON is ignored
+* paths can include array indexes (ie: arrayField_0_memberOfArrayObject)
 
 COMPILE
 -------
@@ -24,13 +25,21 @@ EXAMPLES
 Example scripts with simple sample data are in src/test/scripts. Here some excerpts:
 
 * Query with complex fields like arrays
-
 ```sql
 CREATE TABLE json_test1 (
 	one boolean,
 	three array<string>,
 	two double,
 	four string )
+ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
+STORED AS TEXTFILE;
+```
+
+* Extract the foo field from the first element of an array
+Or null if it does not exist.
+```sql
+CREATE TABLE json_test1 (
+	three_0_foo string)
 ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
 STORED AS TEXTFILE;
 ```
